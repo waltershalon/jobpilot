@@ -1,281 +1,52 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import './App.css'
 
 const API = '/api'
 
-// ── Styles ──────────────────────────────────────────────────────
-const styles = {
-  app: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    background: '#0f1117',
-    color: '#e1e4e8',
-    minHeight: '100vh',
-  },
-  header: {
-    background: 'linear-gradient(135deg, #1a1f35 0%, #0d1117 100%)',
-    borderBottom: '1px solid #21262d',
-    padding: '16px 32px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  logo: {
-    fontSize: '22px',
-    fontWeight: '700',
-    color: '#58a6ff',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-  },
-  nav: {
-    display: 'flex',
-    gap: '4px',
-  },
-  navBtn: (active) => ({
-    padding: '8px 18px',
-    border: 'none',
-    borderRadius: '8px',
-    background: active ? '#21262d' : 'transparent',
-    color: active ? '#58a6ff' : '#8b949e',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: active ? '600' : '400',
-    transition: 'all 0.15s',
-  }),
-  main: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '24px 32px',
-  },
-  card: {
-    background: '#161b22',
-    border: '1px solid #21262d',
-    borderRadius: '12px',
-    padding: '24px',
-    marginBottom: '20px',
-  },
-  cardTitle: {
-    fontSize: '16px',
-    fontWeight: '600',
-    marginBottom: '16px',
-    color: '#e1e4e8',
-  },
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-    gap: '16px',
-    marginBottom: '24px',
-  },
-  statCard: (color) => ({
-    background: '#161b22',
-    border: '1px solid #21262d',
-    borderRadius: '12px',
-    padding: '20px',
-    borderLeft: `3px solid ${color}`,
-  }),
-  statValue: {
-    fontSize: '28px',
-    fontWeight: '700',
-    color: '#e1e4e8',
-  },
-  statLabel: {
-    fontSize: '13px',
-    color: '#8b949e',
-    marginTop: '4px',
-  },
-  input: {
-    width: '100%',
-    padding: '12px 16px',
-    background: '#0d1117',
-    border: '1px solid #30363d',
-    borderRadius: '8px',
-    color: '#e1e4e8',
-    fontSize: '14px',
-    outline: 'none',
-    boxSizing: 'border-box',
-  },
-  textarea: {
-    width: '100%',
-    padding: '12px 16px',
-    background: '#0d1117',
-    border: '1px solid #30363d',
-    borderRadius: '8px',
-    color: '#e1e4e8',
-    fontSize: '14px',
-    outline: 'none',
-    minHeight: '120px',
-    resize: 'vertical',
-    fontFamily: 'inherit',
-    boxSizing: 'border-box',
-  },
-  btn: (variant = 'primary') => ({
-    padding: '10px 24px',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.15s',
-    ...(variant === 'primary' ? {
-      background: 'linear-gradient(135deg, #238636 0%, #2ea043 100%)',
-      color: '#fff',
-    } : variant === 'secondary' ? {
-      background: '#21262d',
-      color: '#e1e4e8',
-      border: '1px solid #30363d',
-    } : variant === 'danger' ? {
-      background: '#da3633',
-      color: '#fff',
-    } : {
-      background: '#1f6feb',
-      color: '#fff',
-    }),
-  }),
-  badge: (color) => ({
-    display: 'inline-block',
-    padding: '3px 10px',
-    borderRadius: '12px',
-    fontSize: '12px',
-    fontWeight: '600',
-    background: color + '22',
-    color: color,
-    border: `1px solid ${color}44`,
-  }),
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-  },
-  th: {
-    textAlign: 'left',
-    padding: '10px 12px',
-    borderBottom: '1px solid #21262d',
-    color: '#8b949e',
-    fontSize: '12px',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-  },
-  td: {
-    padding: '12px',
-    borderBottom: '1px solid #21262d',
-    fontSize: '14px',
-  },
-  progressBar: () => ({
-    width: '100%',
-    height: '8px',
-    background: '#21262d',
-    borderRadius: '4px',
-    overflow: 'hidden',
-    position: 'relative',
-  }),
-  progressFill: (pct, color) => ({
-    width: `${pct}%`,
-    height: '100%',
-    background: color,
-    borderRadius: '4px',
-    transition: 'width 0.5s ease',
-  }),
-  tag: {
-    display: 'inline-block',
-    padding: '2px 8px',
-    borderRadius: '4px',
-    fontSize: '12px',
-    background: '#21262d',
-    color: '#8b949e',
-    marginRight: '4px',
-    marginBottom: '4px',
-  },
-  matchedTag: {
-    display: 'inline-block',
-    padding: '2px 8px',
-    borderRadius: '4px',
-    fontSize: '12px',
-    background: '#23863622',
-    color: '#3fb950',
-    marginRight: '4px',
-    marginBottom: '4px',
-    border: '1px solid #23863644',
-  },
-  missingTag: {
-    display: 'inline-block',
-    padding: '2px 8px',
-    borderRadius: '4px',
-    fontSize: '12px',
-    background: '#f8514922',
-    color: '#f85149',
-    marginRight: '4px',
-    marginBottom: '4px',
-    border: '1px solid #f8514944',
-  },
-  modal: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'rgba(0,0,0,0.7)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-    padding: '24px',
-  },
-  modalContent: {
-    background: '#161b22',
-    border: '1px solid #30363d',
-    borderRadius: '16px',
-    width: '100%',
-    maxWidth: '800px',
-    maxHeight: '85vh',
-    overflow: 'auto',
-    padding: '32px',
-  },
-}
-
 const STATUS_COLORS = {
-  discovered: '#8b949e',
-  resume_ready: '#58a6ff',
-  applied: '#d29922',
-  response: '#3fb950',
-  interview: '#a371f7',
-  offer: '#238636',
-  rejected: '#f85149',
-  withdrawn: '#6e7681',
-  low_match: '#6e7681',
+  discovered: '#94a3b8',
+  resume_ready: '#60a5fa',
+  applied: '#fbbf24',
+  response: '#34d399',
+  interview: '#a78bfa',
+  offer: '#2dd4bf',
+  rejected: '#f87171',
+  withdrawn: '#64748b',
+  low_match: '#64748b',
 }
 
 // ── Dashboard Components ────────────────────────────────────────
 
 function StatsCards({ stats }) {
+  const cards = [
+    { value: stats.total || 0, label: 'Total Applications', color: '#60a5fa', gradient: 'linear-gradient(135deg, #3b82f6, #60a5fa)' },
+    { value: stats.by_status?.resume_ready || 0, label: 'Resumes Ready', color: '#34d399', gradient: 'linear-gradient(135deg, #10b981, #34d399)' },
+    { value: stats.by_status?.applied || 0, label: 'Applied', color: '#fbbf24', gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)' },
+    { value: stats.by_status?.interview || 0, label: 'Interviews', color: '#a78bfa', gradient: 'linear-gradient(135deg, #8b5cf6, #a78bfa)' },
+    { value: stats.avg_ats_score ? `${Math.round(stats.avg_ats_score * 100)}%` : '-', label: 'Avg ATS Score', color: '#2dd4bf', gradient: 'linear-gradient(135deg, #14b8a6, #2dd4bf)' },
+  ]
+
   return (
-    <div style={styles.statsGrid}>
-      <div style={styles.statCard('#58a6ff')}>
-        <div style={styles.statValue}>{stats.total || 0}</div>
-        <div style={styles.statLabel}>Total Applications</div>
-      </div>
-      <div style={styles.statCard('#3fb950')}>
-        <div style={styles.statValue}>{stats.by_status?.resume_ready || 0}</div>
-        <div style={styles.statLabel}>Resumes Ready</div>
-      </div>
-      <div style={styles.statCard('#d29922')}>
-        <div style={styles.statValue}>{stats.by_status?.applied || 0}</div>
-        <div style={styles.statLabel}>Applied</div>
-      </div>
-      <div style={styles.statCard('#a371f7')}>
-        <div style={styles.statValue}>{stats.by_status?.interview || 0}</div>
-        <div style={styles.statLabel}>Interviews</div>
-      </div>
-      <div style={styles.statCard('#238636')}>
-        <div style={styles.statValue}>
-          {stats.avg_ats_score ? `${Math.round(stats.avg_ats_score * 100)}%` : '-'}
+    <div className="stats-grid">
+      {cards.map((card, i) => (
+        <div key={i} className={`glass stat-card fade-slide-up stagger-${i + 1}`}
+             style={{ '--stat-color': card.color }}>
+          <div style={{
+            position: 'absolute', top: -20, right: -20,
+            width: 80, height: 80, borderRadius: '50%',
+            background: card.gradient, opacity: 0.1,
+          }} />
+          <div className="stat-value" style={{ color: card.color }}>{card.value}</div>
+          <div className="stat-label">{card.label}</div>
         </div>
-        <div style={styles.statLabel}>Avg ATS Score</div>
-      </div>
+      ))}
     </div>
   )
 }
 
 function ApplicationDetailModal({ app, onClose, onStatusChange }) {
   if (!app) return null
-  const scoreColor = app.ats_score >= 0.7 ? '#3fb950' : app.ats_score >= 0.5 ? '#d29922' : '#f85149'
+  const scoreColor = app.ats_score >= 0.7 ? '#34d399' : app.ats_score >= 0.5 ? '#fbbf24' : '#f87171'
   const matched = app.keywords_matched || []
   const missing = app.keywords_missing || []
 
@@ -286,92 +57,84 @@ function ApplicationDetailModal({ app, onClose, onStatusChange }) {
   }, [onClose])
 
   return (
-    <div style={styles.modal} onClick={onClose}>
-      <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="glass-strong modal-content" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
           <div>
-            <h2 style={{ fontSize: '22px', fontWeight: '700', margin: 0, color: '#e1e4e8' }}>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 22, fontWeight: 700, margin: 0 }}>
               {app.title}
             </h2>
-            <div style={{ color: '#8b949e', marginTop: '6px', fontSize: '14px' }}>
-              {app.company} {app.location ? `· ${app.location}` : ''} · Applied {app.created_at?.slice(0, 10)}
+            <div style={{ color: 'var(--text-secondary)', marginTop: 6, fontSize: 14 }}>
+              {app.company} {app.location ? `· ${app.location}` : ''} · {app.created_at?.slice(0, 10)}
             </div>
             {app.url && (
               <a href={app.url} target="_blank" rel="noopener"
-                 style={{ color: '#58a6ff', fontSize: '13px', textDecoration: 'none', display: 'inline-block', marginTop: '4px' }}>
-                View job posting
+                 style={{ color: 'var(--accent-violet)', fontSize: 13, textDecoration: 'none', display: 'inline-block', marginTop: 6 }}>
+                View job posting ↗
               </a>
             )}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {app.ats_score > 0 && (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '32px', fontWeight: '700', color: scoreColor }}>
+                <div style={{ fontFamily: 'var(--font-heading)', fontSize: 34, fontWeight: 700, color: scoreColor }}>
                   {Math.round(app.ats_score * 100)}%
                 </div>
-                <div style={{ fontSize: '11px', color: '#8b949e' }}>ATS Score</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>ATS Score</div>
               </div>
             )}
-            <button onClick={onClose} style={{
-              background: 'none', border: 'none', color: '#8b949e', cursor: 'pointer',
-              fontSize: '24px', lineHeight: 1, padding: '4px',
-            }}>x</button>
+            <button className="close-btn" onClick={onClose}>✕</button>
           </div>
         </div>
 
         {/* Status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-          <span style={{ fontSize: '13px', color: '#8b949e' }}>Status:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Status:</span>
           <select
+            className="input"
             value={app.status}
             onChange={e => onStatusChange(app.id, e.target.value)}
-            style={{ ...styles.input, width: 'auto', padding: '6px 12px', fontSize: '13px' }}
+            style={{ width: 'auto', padding: '6px 32px 6px 12px', fontSize: 13 }}
           >
             {Object.keys(STATUS_COLORS).map(s => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>
             ))}
           </select>
         </div>
 
         {/* Keywords */}
         {(matched.length > 0 || missing.length > 0) && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
             <div>
-              <div style={{ fontSize: '13px', fontWeight: '600', color: '#3fb950', marginBottom: '8px' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent-green)', marginBottom: 8 }}>
                 Keywords Matched ({matched.length})
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                {matched.map((kw, i) => (
-                  <span key={i} style={styles.matchedTag}>{kw}</span>
-                ))}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                {matched.map((kw, i) => <span key={i} className="tag tag-matched">{kw}</span>)}
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '13px', fontWeight: '600', color: '#f85149', marginBottom: '8px' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent-red)', marginBottom: 8 }}>
                 Keywords Missing ({missing.length})
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                {missing.map((kw, i) => (
-                  <span key={i} style={styles.missingTag}>{kw}</span>
-                ))}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                {missing.map((kw, i) => <span key={i} className="tag tag-missing">{kw}</span>)}
               </div>
             </div>
           </div>
         )}
 
         {/* Download Buttons */}
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           {app.resume_path && (
-            <a href={`/api/files/${encodeURIComponent(app.resume_path.split('/').pop())}`}
-               style={{ textDecoration: 'none' }}>
-              <button style={styles.btn('primary')}>Download PDF</button>
+            <a href={`/api/files/${encodeURIComponent(app.resume_path.split('/').pop())}`} style={{ textDecoration: 'none' }}>
+              <button className="btn btn-primary">Download PDF</button>
             </a>
           )}
           {app.cover_letter_path && (
-            <a href={`/api/files/${encodeURIComponent(app.cover_letter_path.split('/').pop())}`}
-               style={{ textDecoration: 'none' }}>
-              <button style={styles.btn('secondary')}>Cover Letter</button>
+            <a href={`/api/files/${encodeURIComponent(app.cover_letter_path.split('/').pop())}`} style={{ textDecoration: 'none' }}>
+              <button className="btn btn-secondary">Cover Letter</button>
             </a>
           )}
         </div>
@@ -383,60 +146,62 @@ function ApplicationDetailModal({ app, onClose, onStatusChange }) {
 function ApplicationsTable({ applications, onStatusChange, onSelectApp }) {
   if (!applications?.length) {
     return (
-      <div style={{ ...styles.card, textAlign: 'center', color: '#8b949e', padding: '48px' }}>
-        No applications yet. Tailor your first resume to get started!
+      <div className="glass empty-state fade-slide-up">
+        <div className="empty-state-icon">✦</div>
+        <p>No applications yet. Tailor your first resume to get started.</p>
       </div>
     )
   }
 
   return (
-    <div style={{ ...styles.card, padding: '0', overflow: 'auto' }}>
-      <table style={styles.table}>
+    <div className="glass table-container fade-slide-up" style={{ padding: 0 }}>
+      <table>
         <thead>
           <tr>
-            <th style={styles.th}>Role</th>
-            <th style={styles.th}>Company</th>
-            <th style={styles.th}>Status</th>
-            <th style={styles.th}>ATS Score</th>
-            <th style={styles.th}>Date</th>
+            <th>Role</th>
+            <th>Company</th>
+            <th>Status</th>
+            <th>ATS Score</th>
+            <th>Date</th>
           </tr>
         </thead>
         <tbody>
-          {applications.map(app => (
-            <tr key={app.id}
-                style={{ transition: 'background 0.15s', cursor: 'pointer' }}
-                onClick={() => onSelectApp(app)}
-                onMouseEnter={e => e.currentTarget.style.background = '#1c2128'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-              <td style={styles.td}>
-                <div style={{ fontWeight: '600' }}>{app.title}</div>
-              </td>
-              <td style={styles.td}>{app.company}</td>
-              <td style={styles.td}>
-                <span style={styles.badge(STATUS_COLORS[app.status] || '#8b949e')}>
-                  {app.status}
-                </span>
-              </td>
-              <td style={styles.td}>
-                {app.ats_score > 0 ? (
-                  <div>
-                    <div style={{ fontWeight: '600', marginBottom: '4px' }}>
-                      {Math.round(app.ats_score * 100)}%
+          {applications.map(app => {
+            const scoreColor = app.ats_score >= 0.7 ? '#34d399' : app.ats_score >= 0.5 ? '#fbbf24' : '#f87171'
+            return (
+              <tr key={app.id} onClick={() => onSelectApp(app)}>
+                <td><span style={{ fontWeight: 600 }}>{app.title}</span></td>
+                <td>{app.company}</td>
+                <td>
+                  <span className="badge" style={{
+                    background: (STATUS_COLORS[app.status] || '#94a3b8') + '18',
+                    color: STATUS_COLORS[app.status] || '#94a3b8',
+                    borderColor: (STATUS_COLORS[app.status] || '#94a3b8') + '30',
+                  }}>
+                    {app.status?.replace(/_/g, ' ')}
+                  </span>
+                </td>
+                <td>
+                  {app.ats_score > 0 ? (
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4, color: scoreColor }}>
+                        {Math.round(app.ats_score * 100)}%
+                      </div>
+                      <div className="progress-track">
+                        <div className="progress-fill" style={{
+                          width: `${app.ats_score * 100}%`,
+                          background: scoreColor,
+                        }} />
+                      </div>
                     </div>
-                    <div style={styles.progressBar()}>
-                      <div style={styles.progressFill(
-                        app.ats_score * 100,
-                        app.ats_score >= 0.7 ? '#3fb950' : app.ats_score >= 0.5 ? '#d29922' : '#f85149'
-                      )} />
-                    </div>
-                  </div>
-                ) : '-'}
-              </td>
-              <td style={{ ...styles.td, color: '#8b949e', fontSize: '13px' }}>
-                {app.created_at?.slice(0, 10)}
-              </td>
-            </tr>
-          ))}
+                  ) : <span style={{ color: 'var(--text-muted)' }}>-</span>}
+                </td>
+                <td style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+                  {app.created_at?.slice(0, 10)}
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>
@@ -477,36 +242,35 @@ function ProfileUpload({ onProfileSet, currentProfile }) {
   }
 
   return (
-    <div style={styles.card}>
-      <h3 style={styles.cardTitle}>Your Profile</h3>
+    <div className="glass fade-slide-up" style={{ padding: 24, marginBottom: 20 }}>
+      <h3 className="card-title">Your Profile</h3>
       {currentProfile ? (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <div style={{ fontWeight: '600', fontSize: '16px' }}>{currentProfile.name}</div>
-            <div style={{ color: '#8b949e', fontSize: '13px', marginTop: '4px' }}>
+            <div style={{ fontWeight: 600, fontSize: 16 }}>{currentProfile.name}</div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginTop: 4 }}>
               {currentProfile.email}
-              <span style={{ marginLeft: '12px' }}>
+              <span style={{ marginLeft: 12, color: 'var(--text-muted)' }}>
                 {currentProfile.stats.work} work · {currentProfile.stats.research} research · {currentProfile.stats.projects} projects · {currentProfile.stats.education} education
               </span>
             </div>
           </div>
-          <label style={{ ...styles.btn('secondary'), cursor: 'pointer', display: 'inline-block' }}>
+          <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
             {uploading ? 'Uploading...' : 'Switch Profile'}
             <input type="file" accept=".pdf" onChange={handleUpload} style={{ display: 'none' }} />
           </label>
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: '24px' }}>
-          <p style={{ color: '#8b949e', marginBottom: '16px' }}>
-            Upload your resume PDF to get started. AI will parse it into a profile for tailoring.
-          </p>
-          <label style={{ ...styles.btn('primary'), cursor: 'pointer', display: 'inline-block' }}>
+        <div className="profile-upload-area">
+          <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.4 }}>◎</div>
+          <p>Upload your resume PDF to get started. AI will parse it into a profile for tailoring.</p>
+          <label className="btn btn-primary btn-lg" style={{ cursor: 'pointer' }}>
             {uploading ? 'Parsing resume...' : 'Upload Resume PDF'}
             <input type="file" accept=".pdf" onChange={handleUpload} style={{ display: 'none' }} />
           </label>
-          <div style={{ marginTop: '12px' }}>
+          <div style={{ marginTop: 14 }}>
             <button
-              style={{ ...styles.btn('secondary'), fontSize: '12px' }}
+              className="btn btn-secondary btn-sm"
               onClick={() => onProfileSet({ user_id: null, name: 'Default Profile', email: '', stats: { education: 0, work: 0, research: 0, projects: 0 } })}
             >
               Use default profile instead
@@ -514,11 +278,7 @@ function ProfileUpload({ onProfileSet, currentProfile }) {
           </div>
         </div>
       )}
-      {error && (
-        <div style={{ marginTop: '12px', padding: '12px 16px', background: '#f8514922', border: '1px solid #f8514944', borderRadius: '8px', color: '#f85149', fontSize: '14px' }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="error-box">{error}</div>}
     </div>
   )
 }
@@ -543,20 +303,20 @@ function BulletSuggestionRow({ bullet, index, decision, onDecision }) {
   const charCount = action === 'edit' ? editText.length : (action === 'reject' ? (bullet.original||'').length : (bullet.suggested||bullet.original||'').length)
 
   return (
-    <div style={{ padding: '10px 0', borderBottom: '1px solid #21262d' }}>
+    <div className="bullet-row">
       {/* Original */}
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '6px' }}>
-        <span style={{ fontSize: '10px', color: '#8b949e', minWidth: '50px', paddingTop: '2px' }}>Original</span>
-        <div style={{ fontSize: '13px', color: '#8b949e', lineHeight: '1.5', flex: 1 }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}>
+        <span className="bullet-label" style={{ color: 'var(--text-muted)' }}>Original</span>
+        <div className="bullet-text" style={{ color: 'var(--text-secondary)' }}>
           {bullet.original}
         </div>
       </div>
 
-      {/* Suggestion (if different from original) */}
+      {/* Suggestion */}
       {bullet.action !== 'keep' && bullet.suggested && bullet.suggested !== bullet.original && (
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '6px' }}>
-          <span style={{ fontSize: '10px', color: '#3fb950', minWidth: '50px', paddingTop: '2px' }}>AI</span>
-          <div style={{ fontSize: '13px', color: '#c9d1d9', lineHeight: '1.5', flex: 1, background: '#23863611', padding: '4px 8px', borderRadius: '4px', border: '1px solid #23863633' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}>
+          <span className="bullet-label" style={{ color: 'var(--accent-green)' }}>AI</span>
+          <div className="bullet-text bullet-ai-box">
             {bullet.suggested}
           </div>
         </div>
@@ -564,11 +324,11 @@ function BulletSuggestionRow({ bullet, index, decision, onDecision }) {
 
       {/* Reason */}
       {bullet.reason && (
-        <div style={{ fontSize: '11px', color: '#8b949e', marginLeft: '58px', marginBottom: '6px', fontStyle: 'italic' }}>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 60, marginBottom: 6, fontStyle: 'italic' }}>
           {bullet.reason}
           {bullet.keywords_added?.length > 0 && (
             <span> — Keywords: {bullet.keywords_added.map((kw, i) => (
-              <span key={i} style={{ ...styles.matchedTag, fontSize: '10px', padding: '1px 5px' }}>{kw}</span>
+              <span key={i} className="tag tag-matched" style={{ fontSize: 10, padding: '1px 6px' }}>{kw}</span>
             ))}</span>
           )}
         </div>
@@ -576,49 +336,40 @@ function BulletSuggestionRow({ bullet, index, decision, onDecision }) {
 
       {/* Edit mode */}
       {editing && (
-        <div style={{ marginLeft: '58px', marginBottom: '6px' }}>
+        <div style={{ marginLeft: 60, marginBottom: 6 }}>
           <textarea
+            className="textarea"
             value={editText}
             onChange={e => setEditText(e.target.value)}
-            style={{ ...styles.textarea, minHeight: '60px', fontSize: '13px' }}
+            style={{ minHeight: 60, fontSize: 13 }}
           />
-          <div style={{ display: 'flex', gap: '8px', marginTop: '4px', alignItems: 'center' }}>
-            <button style={{ ...styles.btn('primary'), padding: '4px 12px', fontSize: '12px' }} onClick={saveEdit}>Save</button>
-            <button style={{ ...styles.btn('secondary'), padding: '4px 12px', fontSize: '12px' }} onClick={() => setEditing(false)}>Cancel</button>
-            <span style={{ fontSize: '11px', color: editText.length > 120 ? '#f85149' : '#8b949e' }}>{editText.length}/120 chars</span>
+          <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center' }}>
+            <button className="btn btn-primary btn-sm" onClick={saveEdit}>Save</button>
+            <button className="btn btn-secondary btn-sm" onClick={() => setEditing(false)}>Cancel</button>
+            <span style={{ fontSize: 11, color: editText.length > 120 ? 'var(--accent-red)' : 'var(--text-muted)' }}>
+              {editText.length}/120 chars
+            </span>
           </div>
         </div>
       )}
 
       {/* Action buttons */}
-      <div style={{ display: 'flex', gap: '6px', marginLeft: '58px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 6, marginLeft: 60, alignItems: 'center' }}>
         {bullet.action !== 'keep' && bullet.suggested && (
           <button
+            className={`action-btn accept ${action === 'accept' ? 'active' : ''}`}
             onClick={() => onDecision({ action: 'accept' })}
-            style={{
-              padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', border: 'none',
-              background: action === 'accept' ? '#238636' : '#21262d',
-              color: action === 'accept' ? '#fff' : '#8b949e',
-            }}
           >Accept</button>
         )}
         <button
+          className={`action-btn reject ${action === 'reject' ? 'active' : ''}`}
           onClick={() => onDecision({ action: 'reject' })}
-          style={{
-            padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', border: 'none',
-            background: action === 'reject' ? '#da3633' : '#21262d',
-            color: action === 'reject' ? '#fff' : '#8b949e',
-          }}
         >Keep Original</button>
         <button
+          className={`action-btn edit ${action === 'edit' ? 'active' : ''}`}
           onClick={handleEdit}
-          style={{
-            padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', border: 'none',
-            background: action === 'edit' ? '#1f6feb' : '#21262d',
-            color: action === 'edit' ? '#fff' : '#8b949e',
-          }}
         >Edit</button>
-        <span style={{ fontSize: '11px', color: charCount > 120 ? '#f85149' : '#6e7681', marginLeft: '8px' }}>
+        <span style={{ fontSize: 11, color: charCount > 120 ? 'var(--accent-red)' : 'var(--text-muted)', marginLeft: 8 }}>
           {charCount} chars
         </span>
       </div>
@@ -628,46 +379,45 @@ function BulletSuggestionRow({ bullet, index, decision, onDecision }) {
 
 function ExperienceCard({ exp, selected, onToggle, bulletDecisions, onBulletDecision }) {
   const [expanded, setExpanded] = useState(selected)
-  const scoreColor = exp.relevance_score >= 7 ? '#3fb950' : exp.relevance_score >= 4 ? '#d29922' : '#f85149'
+  const scoreColor = exp.relevance_score >= 7 ? '#34d399' : exp.relevance_score >= 4 ? '#fbbf24' : '#f87171'
 
   return (
-    <div style={{
-      ...styles.card,
-      borderLeft: `3px solid ${selected ? scoreColor : '#30363d'}`,
-      opacity: selected ? 1 : 0.6,
-      marginBottom: '12px',
-    }}>
+    <div className={`glass exp-card ${selected ? 'selected' : 'excluded'}`}
+         style={{ borderLeftColor: selected ? scoreColor : undefined }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, cursor: 'pointer' }}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, cursor: 'pointer' }}
              onClick={() => setExpanded(!expanded)}>
           <div>
-            <div style={{ fontWeight: '600', fontSize: '15px' }}>{exp.title}</div>
-            <div style={{ color: '#8b949e', fontSize: '13px' }}>
+            <div style={{ fontWeight: 600, fontSize: 15 }}>{exp.title}</div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
               {exp.company} · {exp.start_date} — {exp.end_date}
             </div>
           </div>
-          <span style={styles.badge(scoreColor)}>{exp.relevance_score}/10</span>
-          <span style={{ fontSize: '12px', color: '#8b949e', fontStyle: 'italic' }}>{exp.relevance_reason}</span>
+          <span className="badge" style={{
+            background: scoreColor + '18',
+            color: scoreColor,
+            borderColor: scoreColor + '30',
+          }}>{exp.relevance_score}/10</span>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{exp.relevance_reason}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '12px', color: '#8b949e' }}>{expanded ? '▼' : '▶'} {exp.bullets?.length || 0} bullets</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            {expanded ? '▾' : '▸'} {exp.bullets?.length || 0} bullets
+          </span>
           <button
+            className={`btn btn-sm ${selected ? 'btn-teal' : 'btn-secondary'}`}
             onClick={() => onToggle(!selected)}
-            style={{
-              padding: '4px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', border: 'none',
-              background: selected ? '#238636' : '#21262d',
-              color: selected ? '#fff' : '#8b949e',
-            }}
+            style={{ minWidth: 80 }}
           >
-            {selected ? 'Included' : 'Excluded'}
+            {selected ? '✓ Included' : 'Excluded'}
           </button>
         </div>
       </div>
 
       {/* Bullets */}
       {expanded && selected && (
-        <div style={{ marginTop: '12px' }}>
+        <div style={{ marginTop: 14 }}>
           {(exp.bullets || []).map((bullet, i) => (
             <BulletSuggestionRow
               key={i}
@@ -691,33 +441,24 @@ function MissingKeywordsBar({ keywords, suggestions }) {
   ])
 
   return (
-    <div style={{
-      ...styles.card,
-      background: '#f8514911',
-      border: '1px solid #f8514933',
-      padding: '16px 20px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-        <span style={{ fontSize: '14px', fontWeight: '600', color: '#f85149' }}>
+    <div className="missing-kw-bar fade-slide-up">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--accent-red)' }}>
           {allMissing.size} Missing Keywords
         </span>
-        <span style={{ fontSize: '12px', color: '#8b949e' }}>
+        <span className="section-subtitle">
           AI has suggestions for where to add some of these
         </span>
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: suggestions?.length ? '12px' : 0 }}>
-        {[...allMissing].map((kw, i) => (
-          <span key={i} style={styles.missingTag}>{kw}</span>
-        ))}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: suggestions?.length ? 12 : 0 }}>
+        {[...allMissing].map((kw, i) => <span key={i} className="tag tag-missing">{kw}</span>)}
       </div>
       {suggestions?.length > 0 && (
-        <div style={{ marginTop: '8px' }}>
+        <div style={{ marginTop: 8 }}>
           {suggestions.slice(0, 5).map((s, i) => (
-            <div key={i} style={{ fontSize: '12px', color: '#c9d1d9', padding: '4px 0', borderTop: i > 0 ? '1px solid #21262d' : 'none' }}>
-              <span style={styles.missingTag}>{s.keyword}</span>
-              <span style={{ color: '#8b949e', marginLeft: '8px' }}>
-                → {s.suggestion}
-              </span>
+            <div key={i} style={{ fontSize: 12, padding: '5px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+              <span className="tag tag-missing">{s.keyword}</span>
+              <span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>→ {s.suggestion}</span>
             </div>
           ))}
         </div>
@@ -727,27 +468,21 @@ function MissingKeywordsBar({ keywords, suggestions }) {
 }
 
 function SuggestionsEditor({ suggestions, sessionId, userId, onFinalized }) {
-  // State for user decisions
   const [selectedExps, setSelectedExps] = useState(() => {
     const initial = {}
-    ;(suggestions.experiences || []).forEach(exp => {
-      initial[exp.id] = exp.selected
-    })
+    ;(suggestions.experiences || []).forEach(exp => { initial[exp.id] = exp.selected })
     return initial
   })
   const [bulletDecisions, setBulletDecisions] = useState({})
   const [selectedProjects, setSelectedProjects] = useState(() => {
     const initial = {}
-    ;(suggestions.projects || []).forEach(proj => {
-      initial[proj.id] = proj.selected
-    })
+    ;(suggestions.projects || []).forEach(proj => { initial[proj.id] = proj.selected })
     return initial
   })
   const [projectBulletDecisions, setProjectBulletDecisions] = useState({})
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState(null)
 
-  // Page estimate
   const selectedExpCount = Object.values(selectedExps).filter(Boolean).length
   const selectedProjCount = Object.values(selectedProjects).filter(Boolean).length
   const totalBullets = (suggestions.experiences || [])
@@ -787,30 +522,23 @@ function SuggestionsEditor({ suggestions, sessionId, userId, onFinalized }) {
   }
 
   const acceptAll = () => {
-    // Accept all AI suggestions
     const bd = {}
     ;(suggestions.experiences || []).forEach(exp => {
       bd[exp.id] = {}
-      ;(exp.bullets || []).forEach((b, i) => {
-        bd[exp.id][String(i)] = { action: 'accept' }
-      })
+      ;(exp.bullets || []).forEach((b, i) => { bd[exp.id][String(i)] = { action: 'accept' } })
     })
     setBulletDecisions(bd)
   }
 
   const rejectAll = () => {
-    // Keep all originals
     const bd = {}
     ;(suggestions.experiences || []).forEach(exp => {
       bd[exp.id] = {}
-      ;(exp.bullets || []).forEach((b, i) => {
-        bd[exp.id][String(i)] = { action: 'reject' }
-      })
+      ;(exp.bullets || []).forEach((b, i) => { bd[exp.id][String(i)] = { action: 'reject' } })
     })
     setBulletDecisions(bd)
   }
 
-  // Collect all missing keywords from keyword_suggestions
   const missingKeywords = (suggestions.job?.keywords || []).filter(kw => {
     const allText = (suggestions.experiences || [])
       .flatMap(e => (e.bullets || []).map(b => (b.suggested || b.original || '').toLowerCase()))
@@ -821,62 +549,52 @@ function SuggestionsEditor({ suggestions, sessionId, userId, onFinalized }) {
   return (
     <div>
       {/* Job Header */}
-      <div style={styles.card}>
+      <div className="glass fade-slide-up" style={{ padding: 24, marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <h3 style={{ ...styles.cardTitle, fontSize: '20px', marginBottom: '4px' }}>
+            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
               {suggestions.job?.title}
             </h3>
-            <div style={{ color: '#8b949e' }}>
+            <div style={{ color: 'var(--text-secondary)' }}>
               {suggestions.job?.company} · {suggestions.job?.industry}
             </div>
           </div>
-          <div style={{
-            textAlign: 'center', padding: '8px 16px', borderRadius: '8px',
-            background: estPages === 1 ? '#23863622' : '#f8514922',
-            border: `1px solid ${estPages === 1 ? '#23863644' : '#f8514944'}`,
-          }}>
-            <div style={{ fontSize: '18px', fontWeight: '700', color: estPages === 1 ? '#3fb950' : '#f85149' }}>
+          <div className={`page-badge ${estPages === 1 ? 'ok' : 'warn'}`}>
+            <div style={{
+              fontFamily: 'var(--font-heading)', fontSize: 20, fontWeight: 700,
+              color: estPages === 1 ? 'var(--accent-green)' : 'var(--accent-red)',
+            }}>
               ~{estPages} page{estPages > 1 ? 's' : ''}
             </div>
-            <div style={{ fontSize: '11px', color: '#8b949e' }}>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
               {selectedExpCount} exp · {totalBullets} bullets · {selectedProjCount} proj
             </div>
           </div>
         </div>
       </div>
 
-      {/* Missing Keywords */}
-      <MissingKeywordsBar
-        keywords={missingKeywords}
-        suggestions={suggestions.keyword_suggestions}
-      />
+      <MissingKeywordsBar keywords={missingKeywords} suggestions={suggestions.keyword_suggestions} />
 
       {/* Action Bar */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', alignItems: 'center' }}>
-        <button style={{ ...styles.btn('primary'), opacity: generating ? 0.6 : 1 }}
-                onClick={handleFinalize} disabled={generating}>
-          {generating ? 'Generating PDF...' : 'Generate Final PDF'}
+      <div className="fade-slide-up stagger-2" style={{ display: 'flex', gap: 8, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+        <button className="btn btn-primary" onClick={handleFinalize} disabled={generating}>
+          {generating ? '⟳ Generating PDF...' : '✦ Generate Final PDF'}
         </button>
-        <button style={styles.btn('secondary')} onClick={acceptAll}>Accept All AI</button>
-        <button style={styles.btn('secondary')} onClick={rejectAll}>Keep All Originals</button>
+        <button className="btn btn-secondary" onClick={acceptAll}>Accept All AI</button>
+        <button className="btn btn-secondary" onClick={rejectAll}>Keep All Originals</button>
         {estPages > 1 && (
-          <span style={{ fontSize: '12px', color: '#f85149', marginLeft: '8px' }}>
+          <span style={{ fontSize: 12, color: 'var(--accent-red)', marginLeft: 8 }}>
             Content may exceed 1 page — consider excluding some experiences
           </span>
         )}
       </div>
 
-      {error && (
-        <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#f8514922', border: '1px solid #f8514944', borderRadius: '8px', color: '#f85149', fontSize: '14px' }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="error-box">{error}</div>}
 
       {/* Work Experience */}
       {(suggestions.experiences || []).filter(e => e.source === 'work_experience').length > 0 && (
-        <>
-          <h3 style={{ ...styles.cardTitle, marginBottom: '12px' }}>Work Experience</h3>
+        <div className="fade-slide-up stagger-3">
+          <h3 className="section-title">Work Experience</h3>
           {(suggestions.experiences || [])
             .filter(e => e.source === 'work_experience')
             .sort((a, b) => (b.relevance_score || 0) - (a.relevance_score || 0))
@@ -888,18 +606,17 @@ function SuggestionsEditor({ suggestions, sessionId, userId, onFinalized }) {
                 onToggle={(val) => setSelectedExps(prev => ({ ...prev, [exp.id]: val }))}
                 bulletDecisions={bulletDecisions[exp.id]}
                 onBulletDecision={(idx, dec) => setBulletDecisions(prev => ({
-                  ...prev,
-                  [exp.id]: { ...(prev[exp.id] || {}), [idx]: dec }
+                  ...prev, [exp.id]: { ...(prev[exp.id] || {}), [idx]: dec }
                 }))}
               />
             ))}
-        </>
+        </div>
       )}
 
       {/* Research Experience */}
       {(suggestions.experiences || []).filter(e => e.source === 'research_experience').length > 0 && (
-        <>
-          <h3 style={{ ...styles.cardTitle, marginBottom: '12px', marginTop: '24px' }}>Research Experience</h3>
+        <div className="fade-slide-up stagger-4">
+          <h3 className="section-title" style={{ marginTop: 28 }}>Research Experience</h3>
           {(suggestions.experiences || [])
             .filter(e => e.source === 'research_experience')
             .sort((a, b) => (b.relevance_score || 0) - (a.relevance_score || 0))
@@ -911,18 +628,17 @@ function SuggestionsEditor({ suggestions, sessionId, userId, onFinalized }) {
                 onToggle={(val) => setSelectedExps(prev => ({ ...prev, [exp.id]: val }))}
                 bulletDecisions={bulletDecisions[exp.id]}
                 onBulletDecision={(idx, dec) => setBulletDecisions(prev => ({
-                  ...prev,
-                  [exp.id]: { ...(prev[exp.id] || {}), [idx]: dec }
+                  ...prev, [exp.id]: { ...(prev[exp.id] || {}), [idx]: dec }
                 }))}
               />
             ))}
-        </>
+        </div>
       )}
 
       {/* Projects */}
       {(suggestions.projects || []).length > 0 && (
-        <>
-          <h3 style={{ ...styles.cardTitle, marginBottom: '12px', marginTop: '24px' }}>Projects</h3>
+        <div className="fade-slide-up stagger-5">
+          <h3 className="section-title" style={{ marginTop: 28 }}>Projects</h3>
           {(suggestions.projects || [])
             .sort((a, b) => (b.relevance_score || 0) - (a.relevance_score || 0))
             .map(proj => (
@@ -933,24 +649,23 @@ function SuggestionsEditor({ suggestions, sessionId, userId, onFinalized }) {
                 onToggle={(val) => setSelectedProjects(prev => ({ ...prev, [proj.id]: val }))}
                 bulletDecisions={projectBulletDecisions[proj.id]}
                 onBulletDecision={(idx, dec) => setProjectBulletDecisions(prev => ({
-                  ...prev,
-                  [proj.id]: { ...(prev[proj.id] || {}), [idx]: dec }
+                  ...prev, [proj.id]: { ...(prev[proj.id] || {}), [idx]: dec }
                 }))}
               />
             ))}
-        </>
+        </div>
       )}
 
       {/* Skills Preview */}
       {suggestions.skills && (
-        <div style={{ ...styles.card, marginTop: '24px' }}>
-          <h3 style={styles.cardTitle}>Skills (reordered for this JD)</h3>
+        <div className="glass fade-slide-up" style={{ marginTop: 24, padding: 24 }}>
+          <h3 className="card-title">Skills (reordered for this JD)</h3>
           {Object.entries(suggestions.skills).map(([category, items]) => (
-            <div key={category} style={{ marginBottom: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: '600', color: '#8b949e', textTransform: 'capitalize' }}>
+            <div key={category} style={{ marginBottom: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'capitalize' }}>
                 {category.replace(/_/g, ' ')}:
               </span>
-              <span style={{ fontSize: '13px', color: '#c9d1d9', marginLeft: '8px' }}>
+              <span style={{ fontSize: 13, color: 'var(--text-secondary)', marginLeft: 8 }}>
                 {(items || []).join(', ')}
               </span>
             </div>
@@ -958,11 +673,10 @@ function SuggestionsEditor({ suggestions, sessionId, userId, onFinalized }) {
         </div>
       )}
 
-      {/* Bottom action bar */}
-      <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
-        <button style={{ ...styles.btn('primary'), opacity: generating ? 0.6 : 1, padding: '12px 32px', fontSize: '15px' }}
-                onClick={handleFinalize} disabled={generating}>
-          {generating ? 'Generating PDF...' : 'Generate Final PDF'}
+      {/* Bottom action */}
+      <div style={{ display: 'flex', gap: 8, marginTop: 24 }}>
+        <button className="btn btn-primary btn-lg" onClick={handleFinalize} disabled={generating}>
+          {generating ? '⟳ Generating PDF...' : '✦ Generate Final PDF'}
         </button>
       </div>
     </div>
@@ -977,9 +691,7 @@ function TailorPanel({ userId }) {
   const [jdText, setJdText] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-
-  // Phased flow: input → suggestions → result
-  const [phase, setPhase] = useState('input') // input | suggestions | result
+  const [phase, setPhase] = useState('input')
   const [suggestions, setSuggestions] = useState(null)
   const [sessionId, setSessionId] = useState(null)
   const [result, setResult] = useState(null)
@@ -1010,83 +722,68 @@ function TailorPanel({ userId }) {
     }
   }
 
-  const handleFinalized = (data) => {
-    setResult(data)
-    setPhase('result')
-  }
+  const handleFinalized = (data) => { setResult(data); setPhase('result') }
+  const handleReset = () => { setPhase('input'); setSuggestions(null); setSessionId(null); setResult(null); setError(null) }
 
-  const handleReset = () => {
-    setPhase('input')
-    setSuggestions(null)
-    setSessionId(null)
-    setResult(null)
-    setError(null)
-  }
-
-  // Phase: Input
   if (phase === 'input') {
     return (
-      <div>
-        <div style={styles.card}>
-          <h3 style={styles.cardTitle}>Tailor Resume to Job</h3>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-            <button style={styles.navBtn(mode === 'url')} onClick={() => setMode('url')}>Paste URL</button>
-            <button style={styles.navBtn(mode === 'text')} onClick={() => setMode('text')}>Paste JD Text</button>
-          </div>
-          {mode === 'url' ? (
-            <input style={styles.input} placeholder="https://boards.greenhouse.io/company/jobs/12345"
-                   value={jdUrl} onChange={e => setJdUrl(e.target.value)}
-                   onKeyDown={e => e.key === 'Enter' && handleGetSuggestions()} />
-          ) : (
-            <textarea style={styles.textarea} placeholder="Paste the full job description here..."
-                      value={jdText} onChange={e => setJdText(e.target.value)} />
-          )}
-          <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button style={{ ...styles.btn('primary'), opacity: loading ? 0.6 : 1, minWidth: '200px' }}
-                    onClick={handleGetSuggestions} disabled={loading}>
-              {loading ? 'Analyzing JD...' : 'Get AI Suggestions'}
-            </button>
-            {loading && (
-              <span style={{ color: '#8b949e', fontSize: '13px' }}>
-                Parsing JD, generating suggestions for each experience... ~30s
-              </span>
-            )}
-          </div>
-          {error && (
-            <div style={{ marginTop: '16px', padding: '12px 16px', background: '#f8514922', border: '1px solid #f8514944', borderRadius: '8px', color: '#f85149', fontSize: '14px' }}>
-              {error}
-            </div>
+      <div className="glass fade-slide-up" style={{ padding: 28 }}>
+        <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
+          Tailor your resume
+        </h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 20, lineHeight: 1.5 }}>
+          Paste a job posting URL or description and let AI optimize your resume for it.
+        </p>
+
+        <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+          <button className={`nav-btn ${mode === 'url' ? 'active' : ''}`}
+                  onClick={() => setMode('url')}>Paste URL</button>
+          <button className={`nav-btn ${mode === 'text' ? 'active' : ''}`}
+                  onClick={() => setMode('text')}>Paste JD Text</button>
+        </div>
+
+        {mode === 'url' ? (
+          <input className="input" placeholder="https://boards.greenhouse.io/company/jobs/12345"
+                 value={jdUrl} onChange={e => setJdUrl(e.target.value)}
+                 onKeyDown={e => e.key === 'Enter' && handleGetSuggestions()} />
+        ) : (
+          <textarea className="textarea" placeholder="Paste the full job description here..."
+                    value={jdText} onChange={e => setJdText(e.target.value)} />
+        )}
+
+        <div style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button className="btn btn-primary btn-lg" onClick={handleGetSuggestions} disabled={loading}>
+            {loading ? '⟳ Analyzing JD...' : '✦ Get AI Suggestions'}
+          </button>
+          {loading && (
+            <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+              Parsing JD and generating suggestions... ~30s
+            </span>
           )}
         </div>
+        {error && <div className="error-box">{error}</div>}
       </div>
     )
   }
 
-  // Phase: Suggestions Editor
   if (phase === 'suggestions' && suggestions) {
     return (
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <button style={styles.btn('secondary')} onClick={handleReset}>← Back to Input</button>
-          <span style={{ color: '#8b949e', fontSize: '13px' }}>Review AI suggestions, then generate your PDF</span>
+        <div className="fade-slide-up" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <button className="btn btn-secondary" onClick={handleReset}>← Back</button>
+          <span className="section-subtitle">Review AI suggestions, then generate your PDF</span>
         </div>
-        <SuggestionsEditor
-          suggestions={suggestions}
-          sessionId={sessionId}
-          userId={userId}
-          onFinalized={handleFinalized}
-        />
+        <SuggestionsEditor suggestions={suggestions} sessionId={sessionId} userId={userId} onFinalized={handleFinalized} />
       </div>
     )
   }
 
-  // Phase: Result
   if (phase === 'result' && result) {
     return (
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <button style={styles.btn('secondary')} onClick={handleReset}>← New Tailoring</button>
-          <button style={styles.btn('secondary')} onClick={() => setPhase('suggestions')}>← Back to Editor</button>
+        <div className="fade-slide-up" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <button className="btn btn-secondary" onClick={handleReset}>← New Tailoring</button>
+          <button className="btn btn-secondary" onClick={() => setPhase('suggestions')}>← Back to Editor</button>
         </div>
         <TailorResult result={result} />
       </div>
@@ -1098,27 +795,30 @@ function TailorPanel({ userId }) {
 
 function TailorResult({ result }) {
   const { job, ats, files, cover_letter, pages } = result
-  const scoreColor = ats.overall_score >= 0.7 ? '#3fb950'
-    : ats.overall_score >= 0.5 ? '#d29922' : '#f85149'
+  const scoreColor = ats.overall_score >= 0.7 ? '#34d399' : ats.overall_score >= 0.5 ? '#fbbf24' : '#f87171'
 
   return (
     <div>
-      <div style={styles.card}>
+      {/* Job summary card */}
+      <div className="glass fade-slide-up" style={{ padding: 28, marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <h3 style={{ ...styles.cardTitle, fontSize: '20px', marginBottom: '4px' }}>{job.title}</h3>
-            <div style={{ color: '#8b949e' }}>
+          <div style={{ flex: 1 }}>
+            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 22, fontWeight: 700, marginBottom: 4 }}>{job.title}</h3>
+            <div style={{ color: 'var(--text-secondary)' }}>
               {job.company} · {job.location} · {job.seniority} · {job.industry}
             </div>
-            <p style={{ color: '#c9d1d9', marginTop: '8px', fontSize: '14px', lineHeight: '1.5' }}>{job.summary}</p>
+            <p style={{ color: 'var(--text-secondary)', marginTop: 10, fontSize: 14, lineHeight: 1.6 }}>{job.summary}</p>
           </div>
-          <div style={{ textAlign: 'center', minWidth: '120px' }}>
-            <div style={{ fontSize: '36px', fontWeight: '700', color: scoreColor }}>
+          <div style={{ textAlign: 'center', minWidth: 120 }}>
+            <div style={{ fontFamily: 'var(--font-heading)', fontSize: 40, fontWeight: 800, color: scoreColor, lineHeight: 1 }}>
               {Math.round(ats.overall_score * 100)}%
             </div>
-            <div style={{ fontSize: '12px', color: '#8b949e' }}>ATS Match</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>ATS Match</div>
             {pages > 0 && (
-              <div style={{ fontSize: '12px', marginTop: '6px', color: pages === 1 ? '#3fb950' : '#f85149', fontWeight: '600' }}>
+              <div style={{
+                fontSize: 12, marginTop: 8, fontWeight: 600,
+                color: pages === 1 ? 'var(--accent-green)' : 'var(--accent-red)',
+              }}>
                 {pages === 1 ? '1 page' : `${pages} pages`}
               </div>
             )}
@@ -1126,43 +826,52 @@ function TailorResult({ result }) {
         </div>
       </div>
 
-      <div style={{ ...styles.card, display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-        <a href={files.pdf} style={{ textDecoration: 'none' }}><button style={styles.btn('primary')}>Download PDF</button></a>
-        <a href={files.tex} style={{ textDecoration: 'none' }}><button style={styles.btn('secondary')}>Download .tex</button></a>
-        <a href={files.docx} style={{ textDecoration: 'none' }}><button style={styles.btn('secondary')}>Download DOCX</button></a>
-        <a href={files.cover_letter} style={{ textDecoration: 'none' }}><button style={styles.btn('secondary')}>Cover Letter</button></a>
+      {/* Downloads */}
+      <div className="glass fade-slide-up stagger-1" style={{ display: 'flex', gap: 10, padding: 20, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
+        <a href={files.pdf} style={{ textDecoration: 'none' }}>
+          <button className="btn btn-primary">Download PDF</button>
+        </a>
+        <a href={files.tex} style={{ textDecoration: 'none' }}>
+          <button className="btn btn-secondary">Download .tex</button>
+        </a>
+        <a href={files.docx} style={{ textDecoration: 'none' }}>
+          <button className="btn btn-secondary">Download DOCX</button>
+        </a>
+        <a href={files.cover_letter} style={{ textDecoration: 'none' }}>
+          <button className="btn btn-secondary">Cover Letter</button>
+        </a>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-        <div style={styles.card}>
-          <h4 style={styles.cardTitle}>Keywords Matched</h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+      {/* Keywords */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+        <div className="glass fade-slide-up stagger-2" style={{ padding: 22 }}>
+          <h4 className="card-title">Keywords Matched</h4>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
             {(ats.matched_required || []).concat(ats.matched_tech || []).map((kw, i) => (
-              <span key={i} style={styles.matchedTag}>{kw}</span>
+              <span key={i} className="tag tag-matched">{kw}</span>
             ))}
             {!(ats.matched_required?.length || ats.matched_tech?.length) && (
-              <span style={{ color: '#8b949e' }}>No keywords matched</span>
+              <span style={{ color: 'var(--text-muted)' }}>No keywords matched</span>
             )}
           </div>
         </div>
-        <div style={styles.card}>
-          <h4 style={styles.cardTitle}>Keywords Missing</h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+        <div className="glass fade-slide-up stagger-3" style={{ padding: 22 }}>
+          <h4 className="card-title">Keywords Missing</h4>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
             {(ats.missing_required || []).concat(ats.missing_tech || []).map((kw, i) => (
-              <span key={i} style={styles.missingTag}>{kw}</span>
+              <span key={i} className="tag tag-missing">{kw}</span>
             ))}
             {!(ats.missing_required?.length || ats.missing_tech?.length) && (
-              <span style={{ color: '#3fb950' }}>All keywords covered!</span>
+              <span style={{ color: 'var(--accent-green)' }}>All keywords covered!</span>
             )}
           </div>
         </div>
       </div>
 
-      <div style={styles.card}>
-        <h4 style={styles.cardTitle}>Cover Letter Preview</h4>
-        <div style={{ background: '#0d1117', padding: '20px', borderRadius: '8px', fontSize: '14px', lineHeight: '1.7', color: '#c9d1d9', whiteSpace: 'pre-wrap' }}>
-          {cover_letter}
-        </div>
+      {/* Cover Letter Preview */}
+      <div className="glass fade-slide-up stagger-4" style={{ padding: 24 }}>
+        <h4 className="card-title">Cover Letter Preview</h4>
+        <div className="cover-letter-preview">{cover_letter}</div>
       </div>
     </div>
   )
@@ -1206,40 +915,55 @@ function ScraperPanel() {
 
   return (
     <div>
-      <div style={styles.card}>
-        <h3 style={styles.cardTitle}>Job Discovery</h3>
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-          <input style={{ ...styles.input, flex: 1 }} placeholder="Search query (e.g., AI ML Engineer)"
+      <div className="glass fade-slide-up" style={{ padding: 28, marginBottom: 20 }}>
+        <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
+          Discover jobs
+        </h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 20 }}>
+          Search across job boards or scrape company career pages.
+        </p>
+
+        <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+          <input className="input" style={{ flex: 1 }} placeholder="Search query (e.g., AI ML Engineer)"
                  value={query} onChange={e => setQuery(e.target.value)} />
-          <select style={{ ...styles.input, width: '150px' }} value={source} onChange={e => setSource(e.target.value)}>
+          <select className="input" style={{ width: 160 }} value={source} onChange={e => setSource(e.target.value)}>
             <option value="all">All Sources</option>
             <option value="linkedin">LinkedIn</option>
             <option value="indeed">Indeed</option>
           </select>
-          <button style={styles.btn('primary')} onClick={handleScrape} disabled={loading}>
-            {loading ? 'Searching...' : 'Search Jobs'}
+          <button className="btn btn-primary" onClick={handleScrape} disabled={loading}>
+            {loading ? '⟳ Searching...' : 'Search Jobs'}
           </button>
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <input style={{ ...styles.input, flex: 1 }}
+
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <input className="input" style={{ flex: 1 }}
                  placeholder="Greenhouse/Lever board URL (e.g., https://boards.greenhouse.io/openai)"
                  value={boardUrl} onChange={e => setBoardUrl(e.target.value)} />
-          <button style={styles.btn('secondary')} onClick={handleBoardScrape} disabled={loading}>Scrape Board</button>
+          <button className="btn btn-secondary" onClick={handleBoardScrape} disabled={loading}>Scrape Board</button>
         </div>
       </div>
+
       {result && (
-        <div style={styles.card}>
-          <h4 style={styles.cardTitle}>Found {result.total_found} jobs ({result.new_added} new)</h4>
-          <div style={{ maxHeight: '500px', overflow: 'auto' }}>
+        <div className="glass fade-slide-up" style={{ padding: 24 }}>
+          <h4 className="card-title">Found {result.total_found} jobs ({result.new_added} new)</h4>
+          <div style={{ maxHeight: 500, overflow: 'auto' }}>
             {result.jobs?.map((job, i) => (
-              <div key={i} style={{ padding: '12px 0', borderBottom: '1px solid #21262d', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={i} style={{
+                padding: '14px 0',
+                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
                 <div>
-                  <div style={{ fontWeight: '600' }}>{job.title}</div>
-                  <div style={{ color: '#8b949e', fontSize: '13px' }}>{job.company} · {job.location}</div>
+                  <div style={{ fontWeight: 600 }}>{job.title}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{job.company} · {job.location}</div>
                 </div>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span style={styles.tag}>{job.source}</span>
-                  {job.url && <a href={job.url} target="_blank" rel="noopener" style={{ color: '#58a6ff', fontSize: '13px' }}>View</a>}
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span className="tag">{job.source}</span>
+                  {job.url && (
+                    <a href={job.url} target="_blank" rel="noopener"
+                       style={{ color: 'var(--accent-violet)', fontSize: 13, textDecoration: 'none' }}>View ↗</a>
+                  )}
                 </div>
               </div>
             ))}
@@ -1289,38 +1013,57 @@ export default function App() {
       body: JSON.stringify({ status: newStatus }),
     })
     loadData()
-    // Update modal if open
     if (selectedApp && selectedApp.id === appId) {
       setSelectedApp(prev => ({ ...prev, status: newStatus }))
     }
   }
 
   return (
-    <div style={styles.app}>
-      <header style={styles.header}>
-        <div style={styles.logo}>
-          <span style={{ fontSize: '26px' }}>🚀</span>
+    <div className="app-container">
+      {/* Animated background */}
+      <div className="app-bg">
+        <div className="app-bg-orb3" />
+      </div>
+
+      {/* Header */}
+      <header className="header">
+        <div className="logo">
+          <div className="logo-icon">◉</div>
           <span>JobPilot</span>
         </div>
-        <nav style={styles.nav}>
-          <button style={styles.navBtn(page === 'dashboard')} onClick={() => setPage('dashboard')}>Dashboard</button>
-          <button style={styles.navBtn(page === 'tailor')} onClick={() => setPage('tailor')}>Tailor Resume</button>
-          <button style={styles.navBtn(page === 'scrape')} onClick={() => setPage('scrape')}>Find Jobs</button>
+
+        <nav className="nav">
+          <button className={`nav-btn ${page === 'dashboard' ? 'active' : ''}`}
+                  onClick={() => setPage('dashboard')}>Dashboard</button>
+          <button className={`nav-btn ${page === 'tailor' ? 'active' : ''}`}
+                  onClick={() => setPage('tailor')}>Tailor Resume</button>
+          <button className={`nav-btn ${page === 'scrape' ? 'active' : ''}`}
+                  onClick={() => setPage('scrape')}>Find Jobs</button>
         </nav>
-        <div style={{ fontSize: '12px', color: '#8b949e' }}>
+
+        <div className="api-status">
           {apiStatus?.status === 'ok' ? (
-            <span style={{ color: '#3fb950' }}>API Connected {apiStatus.api_key_set ? '' : '(no API key)'}</span>
+            <>
+              <span className="status-dot online" />
+              <span style={{ color: 'var(--accent-green)' }}>
+                Connected {apiStatus.api_key_set ? '' : '(no key)'}
+              </span>
+            </>
           ) : (
-            <span style={{ color: '#f85149' }}>API Offline — start with: python api.py</span>
+            <>
+              <span className="status-dot offline" />
+              <span style={{ color: 'var(--accent-red)' }}>Offline — run: python api.py</span>
+            </>
           )}
         </div>
       </header>
 
-      <main style={styles.main}>
+      {/* Main */}
+      <main className="main-content">
         {page === 'dashboard' && (
           <>
             <StatsCards stats={stats} />
-            <h3 style={{ ...styles.cardTitle, marginBottom: '12px' }}>Applications</h3>
+            <h3 className="section-title fade-slide-up stagger-3">Applications</h3>
             <ApplicationsTable
               applications={applications}
               onStatusChange={handleStatusChange}
@@ -1337,7 +1080,7 @@ export default function App() {
         {page === 'scrape' && <ScraperPanel />}
       </main>
 
-      {/* Application Detail Modal */}
+      {/* Modal */}
       {selectedApp && (
         <ApplicationDetailModal
           app={selectedApp}
