@@ -1,0 +1,69 @@
+# JobPilot Configuration
+# =====================
+
+# API Configuration
+api:
+  provider: "anthropic"  # anthropic or openai
+  model: "claude-sonnet-4-5-20250929"  # Model for tailoring (fast + good)
+  # Set your API key as environment variable: ANTHROPIC_API_KEY
+  max_tokens: 4096
+
+# Job Search Filters
+search:
+  titles:
+    - "AI Engineer"
+    - "ML Engineer"
+    - "Machine Learning Engineer"
+    - "AI/ML Engineer"
+    - "Healthcare AI Engineer"
+    - "Clinical AI Engineer"
+    - "MLOps Engineer"
+    - "ML Platform Engineer"
+    - "Data Scientist"
+    - "Applied ML Engineer"
+    - "R&D AI Engineer"
+  locations:
+    - "United States"
+    - "Remote"
+  experience_level:
+    - "mid"
+    - "senior"
+  exclude_keywords:
+    - "staff"
+    - "principal"
+    - "director"
+    - "intern"
+
+# Output Configuration
+output:
+  format: ["tex", "pdf", "docx"]  # Primary: LaTeX → PDF, backup: DOCX
+  output_dir: "generated_resumes"
+  template: "latex"  # Uses your .tex template (Helvetica, ATS-safe)
+
+# Scraper Configuration
+scrapers:
+  linkedin:
+    enabled: true
+    max_results: 50
+    search_interval_hours: 24
+  indeed:
+    enabled: true
+    max_results: 50
+  greenhouse_lever:
+    enabled: true
+    company_boards: []  # Add specific company board URLs here
+
+# Tracker
+tracker:
+  db_path: "tracker/applications.json"
+  reminder_days: 7  # Days before follow-up reminder
+
+# Resume Tailoring (strict one-page constraints)
+tailoring:
+  max_work_exp: 2       # Max work experiences to include
+  max_research_exp: 2   # Max research experiences to include
+  max_bullets_per_exp: 3 # Max bullets per experience (keep concise!)
+  max_projects: 1        # Max projects to include
+  include_research: true
+  ats_keyword_threshold: 0.4  # Minimum keyword match score to generate files
+  one_page: true         # Enforce single-page output

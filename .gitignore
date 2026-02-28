@@ -1,0 +1,56 @@
+# Environment & secrets
+.env
+.env.local
+.env.production
+!.env.example
+
+# Generated resumes (contains personal info)
+generated_resumes/*
+!generated_resumes/.gitkeep
+
+# Application tracking data (contains personal info)
+tracker/applications.json
+tracker/*.db
+tracker/*.db-journal
+applications.db
+applications.db-journal
+
+# Personal config profiles
+config/profiles/
+
+# Personal resume files
+*.pdf
+*.docx
+*.aux
+*.log
+*.out
+*.tex
+!config/template_reference.tex
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Vite timestamp files
+vite.config.js.timestamp-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+docker-compose.override.yml

@@ -1,0 +1,94 @@
+{
+  "personal": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "links": {
+      "linkedin": "linkedin.com/in/yourprofile",
+      "github": "github.com/yourusername",
+      "website": "yourwebsite.com"
+    },
+    "location": "City, State, USA",
+    "target_locations": ["US - Remote", "US - Any"],
+    "target_titles": [
+      "Software Engineer",
+      "ML Engineer",
+      "Data Scientist"
+    ]
+  },
+  "education": [
+    {
+      "id": "edu_1",
+      "institution": "Your University",
+      "location": "City, State, USA",
+      "degree": "Master of Science in Computer Science",
+      "gpa": "3.8",
+      "start_date": "Aug 2022",
+      "end_date": "May 2024"
+    },
+    {
+      "id": "edu_2",
+      "institution": "Your Undergraduate University",
+      "location": "City, State, Country",
+      "degree": "Bachelor of Science in Computer Science",
+      "gpa": null,
+      "start_date": "Aug 2018",
+      "end_date": "May 2022"
+    }
+  ],
+  "technical_skills": {
+    "languages": ["Python", "SQL", "JavaScript", "Java"],
+    "data_engineering": ["Apache Spark", "ETL Pipelines", "PostgreSQL", "MongoDB"],
+    "cloud_and_tools": ["AWS", "Docker", "Kubernetes", "CI/CD Pipelines", "Git"],
+    "ai_ml": ["PyTorch", "TensorFlow", "scikit-learn", "LangChain", "OpenAI APIs"]
+  },
+  "work_experience": [
+    {
+      "id": "exp_1",
+      "title": "Software Engineer",
+      "company": "Company Name",
+      "location": "City, State",
+      "start_date": "Jun 2024",
+      "end_date": "Present",
+      "category": "industry",
+      "tags": ["python", "ml", "apis"],
+      "bullets": [
+        "Describe your achievement with metrics and impact.",
+        "Another achievement showing your technical skills.",
+        "Quantify results wherever possible (e.g., improved performance by 30%)."
+      ]
+    }
+  ],
+  "research_experience": [
+    {
+      "id": "exp_research_1",
+      "title": "Research Assistant",
+      "company": "Research Lab Name",
+      "location": "City, State",
+      "start_date": "Jan 2023",
+      "end_date": "May 2024",
+      "category": "research",
+      "tags": ["ml", "research", "python"],
+      "bullets": [
+        "Describe your research contributions and findings.",
+        "Mention publications, presentations, or other outputs."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj_1",
+      "title": "Project Title",
+      "institution": "Your University or Organization",
+      "date": "Fall 2023",
+      "tags": ["python", "ml", "web"],
+      "bullets": [
+        "Describe what you built and the technologies used.",
+        "Highlight the impact or results achieved."
+      ]
+    }
+  ],
+  "certifications": [
+    "Certification Name (Provider)",
+    "Another Certification (Provider)"
+  ]
+}

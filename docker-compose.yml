@@ -1,0 +1,20 @@
+services:
+  api:
+    build: .
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./generated_resumes:/app/generated_resumes
+      - ./config:/app/config
+      - ./tracker:/app/tracker
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - API_URL=http://api:9000
+    depends_on:
+      - api
